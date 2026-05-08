@@ -8,7 +8,7 @@
     import { base } from '$app/paths';
 	import theme from '$lib/state/theme.svelte';
     import Footer from '$lib/components/Footer.svelte';
-    import decoration1 from "$lib/images/clover-icon.png";
+    // import decoration1 from "$lib/images/clover-icon.png";
     // import decoration2 from "$lib/images/pink-heart.png";
     import type { Snippet } from 'svelte';
     import { prefersReducedMotion } from 'svelte/motion';
@@ -64,7 +64,7 @@
 	</Flash>
 </div> -->
 
-{#if !prefersReducedMotion.current}
+<!-- {#if !prefersReducedMotion.current}
     <div class="flakes">
         {#each Array(20) as _, i}
             <img
@@ -75,7 +75,7 @@
             />
         {/each}
     </div>
-{/if}
+{/if} -->
 
 <style lang="scss">
     .flakes {

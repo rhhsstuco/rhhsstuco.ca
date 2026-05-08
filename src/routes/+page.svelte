@@ -6,7 +6,7 @@
     import Navbar from "$lib/components/Navbar/Navbar.svelte";
     import Picture from "$lib/components/Picture.svelte";
     // @ts-ignore
-    import HeroImages from "$lib/images/clover.png?format=avif;webp;png&w=400;800&as=picture";
+    import HeroImages from "$lib/images/people.png?format=avif;webp;png&w=400;800&as=picture";
     import theme from "$lib/state/theme.svelte";
     import type { PageServerData } from "./$types";
 
