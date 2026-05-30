@@ -3,6 +3,13 @@ import { fileURLToPath } from 'url';
 import { rename, readdir } from "fs/promises";
 import inquirer from 'inquirer';
 
+/* The renaming portion of this script can also be completed by pasting the following command in a Windows PowerShell terminals.
+ * $i=[STARTING INDEX]; Get-ChildItem -Filter "*.jpg" | Sort-Object {[int]([regex]::Match($_.BaseName,'\d+').Value)} | ForEach-Object { Rename-Item $_.FullName "$i.jpg"; $i++ }
+ * Make sure to replace [STARTING INDEX] with the index you want to start with, e.g. 220.
+ * This command assumes that all files are .jpg and that the file names contain a number which determines their order. 
+ * It also sorts the files by this number before renaming to avoid name conflicts.
+*/
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -65,7 +72,7 @@ async function main() {
 		const answer = await inquirer.prompt([
 			{
 				name: "choice",
-				type: "list",
+				type: "select",
 				loop: true,
 				message: `Where do you want to insert '${input.basename}'?`,
 				choices: [...orderArray.map(entry => entry.basename), "<append>"],
@@ -110,7 +117,7 @@ async function main() {
 		return rename(oldPath, newPath);
 	}
 
-	// Rename to temp files then to iamge files to avoid name conflicts
+	// Rename to temp files then to image files to avoid name conflicts
 	await Promise.all(filteredArray.map(({ filepath }, i) => renameWithExt(i + 1, filepath, ".temp")))
 	await Promise.all(filteredArray.map(({ filepath }, i) => {
 		const tempName = (i + 1).toString().padStart(digits, "0") + ".temp";
