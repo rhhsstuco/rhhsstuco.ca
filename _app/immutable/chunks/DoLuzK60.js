@@ -1,0 +1,1 @@
+import"./C2-cy_R2.js";import{t as e}from"./BgIJUQTT.js";function t(e){return e/=.5,e<1?.5*e*e:(e--,-.5*(e*(e-2)-1))}var n=new e(`(prefers-reduced-motion: reduce)`);export{t as n,n as t};
