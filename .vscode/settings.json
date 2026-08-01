@@ -1,4 +1,6 @@
 {
     "cmake.sourceDirectory": "C:/Users/ariba/Desktop/Program Files/WEB/stuco-website/node_modules/bare-fs",
-    "svelte.enable-ts-plugin": true
+    "svelte.enable-ts-plugin": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "typescript.enablePromptUseWorkspaceTsdk": true
 }

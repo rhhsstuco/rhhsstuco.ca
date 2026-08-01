@@ -86,10 +86,12 @@ url="https://rhhsstuco.ca/events"
         {/each}
         </div>
     </section>
+    <!--
     <section class="leaderboard">
         <h2><a href="{base}/grade-wars">Grade Wars Leaderboard</a></h2>
         <Leaderboard gradeColors={data.standings.rankings} gradePoints={data.standings.gradePoints}/>
     </section>
+    -->
 </main>
 
 <style lang="scss">
