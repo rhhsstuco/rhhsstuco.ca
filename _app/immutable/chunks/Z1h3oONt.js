@@ -1,0 +1,1 @@
+import"./C5IMXbPc.js";import{t as e}from"./Dni76Aom.js";var t=(t,n)=>new e(`(max-width: ${n}px) and (min-width: ${t}px)`),n=t(0,480),r=t(480,640),i=t(640,768),a=t(0,768),o=t(768,1024),s=t(1024,1152),c=t(1152,1280),l=t(1280,2147483648);export{o as a,r as c,l as i,n as l,s as n,a as o,c as r,i as s,t};
