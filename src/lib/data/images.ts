@@ -9,6 +9,7 @@ import * as path from 'path';
  * Keeping 2400px originals prevents quality loss if we re-enable it.
  * By 2028, webp can be removed as all browsers should support avif by then.
  * Other upcoming file formats like JPEG XL should be considered in the future.
+ * Use https://bulkresizephotos.com/en to resize photos en masse.
  */
 const files = import.meta.glob("$images/gallery/*.{jpg,png,webp,avif}", {
 	query: {
