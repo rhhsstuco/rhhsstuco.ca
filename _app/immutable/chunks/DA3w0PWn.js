@@ -1,1 +1,0 @@
-import"./CLzdkwBA.js";import{t as e}from"./CgJ4a3HE.js";var t=new e(`(prefers-reduced-motion: reduce)`);export{t};
