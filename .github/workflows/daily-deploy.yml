@@ -2,15 +2,14 @@ name: deploy-daily
 
 on:
   schedule:
-    # Runs every day at midnight UTC (0 0 * * *)
     - cron: '7/10 * * * *'
-  workflow_dispatch: # Allows manual trigger from the Actions tab
+  workflow_dispatch: 
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required so the action can push the deployed build back to the repo
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,6 +25,14 @@ jobs:
 
       - name: Build project
         run: npm run build
+        env:
+          PUBLIC_CLUB_LOGOS_FOLDER_ID: ${{ secrets.PUBLIC_CLUB_LOGOS_FOLDER_ID }}
+          PUBLIC_EVENTS_SPREADSHEET_ID: ${{ secrets.PUBLIC_EVENTS_SPREADSHEET_ID }}
+          PUBLIC_GALLERY_FOLDER_ID: ${{ secrets.PUBLIC_GALLERY_FOLDER_ID }}
+          PUBLIC_MEMBERS_FOLDER_ID: ${{ secrets.PUBLIC_MEMBERS_FOLDER_ID }}
+          PUBLIC_SPREADSHEET_ID: ${{ secrets.PUBLIC_SPREADSHEET_ID }}
+          SECRET_GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.SECRET_GOOGLE_DRIVE_CREDENTIALS }}
+          SECRET_GOOGLE_SHEETS_CREDENTIAL: ${{ secrets.SECRET_GOOGLE_SHEETS_CREDENTIAL }}
 
       - name: Deploy to GitHub Pages
         run: |
