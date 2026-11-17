@@ -1,4 +1,4 @@
-name: Daily Build and Deploy
+name: deploy-daily
 
 on:
   schedule:
