@@ -3,7 +3,7 @@ name: deploy-daily
 on:
   schedule:
     # Runs every day at midnight UTC (0 0 * * *)
-    - cron: '0 0 * * *'
+    - cron: '7/10 * * * *'
   workflow_dispatch: # Allows manual trigger from the Actions tab
 
 jobs:
