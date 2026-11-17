@@ -1,5 +1,4 @@
-import type { ImageProps, ImagePropsWithHeight } from "$lib/types/image.types";
-import type { ImageMeta } from "$lib/types/image.types";
+import type { ImageMeta, ImageProps, ImagePropsWithHeight } from "$lib/types/image.types";
 import * as path from 'path';
 
 /*
@@ -14,28 +13,14 @@ import * as path from 'path';
 const files = import.meta.glob("$images/gallery/*.{jpg,png,webp,avif}", {
 	query: {
 		format: 'avif;webp',
-		w: '800;1600',
+		w: '800;1600;2400',
 		rotate: '0',
 		as: 'picture',
 	}
-})
+});
 
 type Orientation = 'horizontal' | 'vertical';
 
-/** 
- * Determines if the image has been rotated by a multiple of 90 degrees 
- * such that the orientation of the image has changed.
- * i.e. it has been rotated by 90 + 180n degrees, where n is an integer.
- * @param img the image to determine correct orientation for.
- * @returns if the image is rotated such that its orientation has changed
- */
-
-/**
- * @param maxResults the maximum size of the response set or undefined if no limit is specified
- * @param orientation allows filtering my image orientation
- * @param useDPR use DPR for responsive images
- * @param reverse if the result order should be reversed
- */
 interface GetGalleryImagesParams {
 	maxResults?: number;
 	orientation?: Orientation;
@@ -44,60 +29,76 @@ interface GetGalleryImagesParams {
 	numericalSort?: boolean;
 }
 
-/**
- * Reads image names from static folder and transforms them into image URLs
- * @param params parameters that can be used to modify this function's behaviour
- * @returns an array of ImageMeta objects
- */
-const getGalleryImages = async (params: GetGalleryImagesParams = {}) => {
+const withSafeImageMeta = (image: any, filename: string) => {
+	const sources = image?.sources as { [key: string]: ImageProps[] | { srcset?: string } | string } | undefined;
+	const img = (image?.img ?? {}) as ImagePropsWithHeight;
 
-	const filepaths = (await Promise.all(
-			Object.entries(files).map(async ([filepath, value]) => ([path.basename(filepath), await value() as any]))
-		))
-		.map(([filename, image]) => {
+	if (img && typeof img === 'object' && typeof img.src === 'string' && !img.w) {
+		img.w = 0;
+	}
 
-			const sources = (image.sources as ({
-				[key: string]: ImageProps[] | { srcset?: string } | string;
-			}));
-
-
-			if (params.useDPR) {
-				Object.entries(sources).forEach(([, source]) => {
-					if (Array.isArray(source)) {
-						source.forEach((prop, i) => (prop.dpr = i + 1));
+	if (sources) {
+		Object.entries(sources).forEach(([, source]) => {
+			if (Array.isArray(source)) {
+				source.forEach((prop) => {
+					if (typeof prop.src === 'string' && !prop.w) {
+						prop.w = 0;
 					}
 				});
 			}
-
-			return {
-				filename: filename,
-				img: {...(image.img as ImagePropsWithHeight)}, // Make copy bc the dimensions of this object are somehow stateful?? Maybe the file objects are cached.
-				sources: sources,
-				
-			} as unknown as ImageMeta & { filename: string }
 		});
+	}
+
+	return {
+		filename,
+		img: { ...img },
+		sources,
+	} as ImageMeta & { filename: string };
+};
+
+const getGalleryImages = async (params: GetGalleryImagesParams = {}) => {
+	let entries = Object.entries(files);
 
 	if (params.numericalSort) {
-		filepaths.sort((a, b) => parseInt(a.filename, 10) - parseInt(b.filename, 10));
+		entries.sort((a, b) => parseInt(path.basename(a[0]), 10) - parseInt(path.basename(b[0]), 10));
 	}
 
 	if (params.reverse) {
-		filepaths.reverse();
+		entries.reverse();
 	}
 
-	let filteredFilepaths = filepaths;
-	
-	filteredFilepaths = filteredFilepaths.slice(0, params.maxResults);
+	if (params.maxResults !== undefined) {
+		entries = entries.slice(0, params.maxResults);
+	}
+
+	const filepaths = (await Promise.all(
+		entries.map(async ([filepath, value]) => {
+			const image = await value();
+			return [path.basename(filepath), image] as const;
+		})
+	)).map(([filename, image]) => {
+		const normalized = withSafeImageMeta(image, filename);
+
+		if (params.useDPR) {
+			Object.entries(normalized.sources ?? {}).forEach(([, source]) => {
+				if (Array.isArray(source)) {
+					source.forEach((prop, i) => (prop.dpr = i + 1));
+				}
+			});
+		}
+
+		return normalized;
+	});
 
 	if (params.orientation === 'horizontal') {
-		filteredFilepaths = filteredFilepaths.filter(img => img.img.w > img.img.h);
+		return filepaths.filter((img) => (img.img.w ?? 0) > (img.img.h ?? 0));
 	}
 
 	if (params.orientation === 'vertical') {
-		filteredFilepaths = filteredFilepaths.filter(img => img.img.h > img.img.w);
+		return filepaths.filter((img) => (img.img.h ?? 0) > (img.img.w ?? 0));
 	}
-	
-	return filteredFilepaths;
-}
+
+	return filepaths;
+};
 
 export default getGalleryImages;

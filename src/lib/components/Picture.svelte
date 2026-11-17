@@ -16,8 +16,8 @@
 		alt = '',
 		loading = 'eager'
 	}: Props = $props();
-	let sources = $derived(meta.sources);
-	let fallback = $derived(meta.img);
+	let sources = $derived(meta.sources ?? {});
+	let fallback = $derived(meta.img ?? { src: '', w: 0, h: 0 });
 
 	const buildSrcset = (srcMeta: unknown) => {
 		if (Array.isArray(srcMeta)) {
@@ -55,7 +55,7 @@
 		/>
 		{/if}
 	{/each}
-	<img src={fallback.src} {alt} {loading} width={fallback.w} height={fallback.h}/>
+	<img src={fallback.src ?? ''} {alt} {loading} width={fallback.w ?? 0} height={fallback.h ?? 0}/>
 </picture>
 
 <style lang="scss">

@@ -40,7 +40,7 @@ export const load: PageServerLoad = async () => {
 			{
 				name: "Sherlock Yu",
 				position: "External & Equity Affairs",
-				imageURL: images["default-pfp"],
+				imageURL: images["sherlock-yu"],
 			},
 			{
 				name: "Melody Jia",
@@ -75,7 +75,7 @@ export const load: PageServerLoad = async () => {
 			{
 				name: "Yunnie Wang",
 				position: "Grade 12 Rep",
-				imageURL: images["default-pfp"],
+				imageURL: images["yunnie-wang"],
 			},
 			{
 				name: "Olivia Wu",
@@ -95,7 +95,7 @@ export const load: PageServerLoad = async () => {
 			{
 				name: "Eleanor Yang",
 				position: "Grade 10 Rep",
-				imageURL: images["default-pfp"],
+				imageURL: images["eleanor-yang"],
 			},
 			{
 				name: "Norris Ji",
@@ -117,6 +117,11 @@ export const load: PageServerLoad = async () => {
 				position: "Mascot",
 				imageURL: images["tessa-berinde"],
 			},
+            {
+                name: "Serena Kitchen",
+                position: "Mascot",
+                imageURL: images["serena-kitchen"],
+            }
 		].map((member, index) => ({ ...member, id: index})),
 	};
 };
