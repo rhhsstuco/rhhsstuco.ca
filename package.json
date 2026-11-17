@@ -44,6 +44,7 @@
 		"postinstall-postinstall@2.1.0": true
 	},
 	"overrides": {
-		"cookie": "^0.7.2"
+		"cookie": "^0.7.2",
+        "picomatch": "^4.0.7"
 	}
 }
