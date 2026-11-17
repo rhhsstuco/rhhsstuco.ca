@@ -113,6 +113,53 @@
 
   const selectDate = (date: Date) => () => (selectedDate = date);
 
+  const eventPriority = (firstEvent: SchoolEvent, secondEvent: SchoolEvent) => {
+    const durationDifference =
+      (secondEvent.endDate.getTime() - secondEvent.startDate.getTime()) -
+      (firstEvent.endDate.getTime() - firstEvent.startDate.getTime());
+
+    return durationDifference ||
+      Number(Boolean(firstEvent.isAuxiliary)) - Number(Boolean(secondEvent.isAuxiliary));
+  };
+
+  let calendarEvents = $derived(events.toSorted(eventPriority));
+
+  function getEventBarIndex(event: SchoolEvent): number {
+    return calendarEvents
+      .filter((candidate) =>
+        candidate.startDate.toDateString() === event.startDate.toDateString()
+      )
+      .indexOf(event);
+  }
+
+  function getEventBarSegments(event: SchoolEvent) {
+    const segments: { row: number; startColumn: number; endColumn: number }[] = [];
+    const monthEnd = new Date(year, month + 1, 0);
+    let segmentStart = new Date(event.startDate);
+    const eventEnd = event.endDate < monthEnd ? event.endDate : monthEnd;
+
+    while (segmentStart <= eventEnd) {
+      const row = Math.ceil((segmentStart.getDate() + firstDayOffset) / 7);
+      const lastDayOfWeek = row * 7 - firstDayOffset;
+      const segmentEnd = new Date(
+        year,
+        month,
+        Math.min(eventEnd.getDate(), lastDayOfWeek)
+      );
+
+      segments.push({
+        row,
+        startColumn: segmentStart.getDay() + 1,
+        endColumn: segmentEnd.getDay() + 2
+      });
+
+      segmentStart = new Date(segmentEnd);
+      segmentStart.setDate(segmentStart.getDate() + 1);
+    }
+
+    return segments;
+  }
+
   /** Grouping of events under the day(s) that the are happening */
   let eventsMap = $derived(
     multiGroupBy(events, (event) => {
@@ -202,19 +249,23 @@
         {/if}
       {/each}
     {/each}
-    {#each events.toReversed() as event}
+    {#each calendarEvents.toReversed() as event}
       <!-- Calculating where to place the date button using CSS Grid Layout -->
-      {#if event.startDate.getMonth() === month && event.startDate.getFullYear() === year}
-        <div
-          class="calendar__body__event"
-          style={`
-						grid-row: ${Math.ceil((event.startDate.getDate() + firstDayOffset) / 7)} / ${Math.ceil((event.endDate.getDate() + firstDayOffset) / 7)};
-						grid-column: ${event.startDate.getDay() + 1} / ${event.endDate.getDay() + 2};
-						--color-badge: var(--color-badge-${event.type})
-					`}
-        >
-          <div class="text-wrapper">{event.name}</div>
-        </div>
+      {@const eventBarIndex = getEventBarIndex(event)}
+      {#if eventBarIndex < 3 && event.startDate.getMonth() === month && event.startDate.getFullYear() === year}
+        {#each getEventBarSegments(event) as segment}
+          <div
+            class="calendar__body__event"
+            style={`
+              grid-row: ${segment.row} / ${segment.row + 1};
+              grid-column: ${segment.startColumn} / ${segment.endColumn};
+              --event-bar-index: ${eventBarIndex};
+              --color-badge: var(--color-badge-${event.type})
+            `}
+          >
+            <div class="text-wrapper">{event.name}</div>
+          </div>
+        {/each}
       {/if}
     {/each}
     <!-- Calender detail that slides in from the right -->
@@ -231,7 +282,7 @@
       >
         <CalendarDetail
           date={selectedDate}
-          events={eventsMap.get(selectedDate.toDateString()) || []}
+          events={(eventsMap.get(selectedDate.toDateString()) || []).toSorted(eventPriority)}
           onclose={() => (selectedDate = null)}
         />
       </div>
@@ -297,12 +348,13 @@
   .calendar__body__event {
     position: absolute;
 
-    bottom: 0;
+    bottom: calc((2 - var(--event-bar-index)) * 1.2rem);
     left: 0;
     right: 0;
   }
 
   .text-wrapper {
+    width: calc(100% - 0.8rem);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -346,6 +398,7 @@
 
   .calendar__body__day {
     font-size: var(--calendar-day-font-size);
+    transform: translateY(-1.6rem);
   }
 
   .calendar__header__days {

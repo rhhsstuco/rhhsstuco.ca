@@ -4,5 +4,6 @@ interface SchoolEvent {
 	startDate: Date;
 	endDate: Date;
 	type: "school" | "club";
+	isAuxiliary?: boolean;
 	useHTML?: boolean;
 }

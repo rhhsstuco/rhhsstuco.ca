@@ -12,22 +12,17 @@ const credentials = JSON.parse(
  * Authenticates the Google Sheets API service account and binds the authentication token to further calls.
  */
 export const initSheetsAuth = async () => {
-	const auth = new google.auth.GoogleAuth({
-		projectId: credentials.project_id,
-		credentials: {
-			client_email: credentials.client_email,
-			private_key: credentials.private_key,
-		},
+	const auth = new google.auth.JWT({
+		email: credentials.client_email,
+		key: credentials.private_key,
 		scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-	})
-
-	const authClient = await auth.getClient();
+	});
 
 	// Bind auth client to all further calls
 	google.options({
-		auth: authClient as any,
+		auth,
 	})
-} 
+}
 
 /**
  * Gets the values from the specified sheet and range
@@ -37,9 +32,14 @@ export const initSheetsAuth = async () => {
  * @returns the spreadsheet values
  */
 export const getSpreadSheetValues = async (spreadsheetId: string, sheetName: string, range: string) => {
+	const escapedSheetName = sheetName.replace(/'/g, "''");
+	const sheetNameForRange = /[\s'!]/.test(sheetName)
+		? `'${escapedSheetName}'`
+		: escapedSheetName;
+
 	const sheetValues = await sheets.spreadsheets.values.get({
 		spreadsheetId,
-		range: `${sheetName}!${range}`
+		range: `${sheetNameForRange}!${range}`
 	});
 
 	return sheetValues.data.values;

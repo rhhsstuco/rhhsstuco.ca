@@ -1,5 +1,6 @@
 import { PUBLIC_SPREADSHEET_ID } from '$env/static/public';
 import { getSpreadSheetValues, initSheetsAuth } from './spreadsheet';
+import getAuxEvents from './auxEvents';
 
 /**
  * @param maxResults the maximum size of the response set or undefined if no limit is specified.
@@ -32,7 +33,7 @@ const getEvents = async (params?: GetEventsParams): Promise<SchoolEvent[]> => {
 	const seenNames = new Set<string>();
 
 	// Remove metadata row and transform the values
-	const transformedValues = values.slice(1).map(row => {
+	const primaryEvents = values.slice(1).map(row => {
 		const splitStartDate = row[2].split('/');
 		const splitEndDate = row[3].split('/');
 
@@ -54,7 +55,11 @@ const getEvents = async (params?: GetEventsParams): Promise<SchoolEvent[]> => {
 			type: <"school" | "club"> type,
 			useHTML: row[5] ? (row[5].toLowerCase() === "true") : undefined
 		} as SchoolEvent
-	}).filter(schoolEvent => {
+	});
+
+	const auxiliaryEvents = await getAuxEvents();
+
+	const transformedValues = primaryEvents.concat(auxiliaryEvents).filter(schoolEvent => {
 		if (minDate) {
 			return schoolEvent.startDate > minDate;
 		}
@@ -72,7 +77,9 @@ const getEvents = async (params?: GetEventsParams): Promise<SchoolEvent[]> => {
 		}
 
 		return true;
-	}).slice(0, maxResults);
+	}).sort((firstEvent, secondEvent) =>
+		firstEvent.startDate.getTime() - secondEvent.startDate.getTime()
+	).slice(0, maxResults);
 
 	return transformedValues;
 };
